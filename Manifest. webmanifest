@@ -1,0 +1,10 @@
+{
+  "name": "Football Predictor",
+  "short_name": "Football",
+  "description": "Football match predictions",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#101827",
+  "theme_color": "#101827",
+  "orientation": "portrait"
+}
