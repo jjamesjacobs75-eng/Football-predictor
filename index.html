@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<title>Football Predictor</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#141f30;--panel2:#1b2a40;--muted:#9aabc0;--text:#f4f7fb;--green:#35d39a;--yellow:#f4c76b;--red:#ff7777}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#101c2d,#0b1220 42%);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:22px 18px 14px;position:sticky;top:0;background:#101a2aee;backdrop-filter:blur(12px);z-index:2;border-bottom:1px solid #26354a}
+.brand{display:flex;align-items:center;gap:10px}.logo{width:38px;height:38px;border-radius:12px;background:#1d6e57;display:grid;place-items:center;font-size:21px}
+h1{font-size:20px;margin:0}header p{margin:3px 0 0;color:var(--muted);font-size:12px}
+main{padding:16px;max-width:760px;margin:auto}.notice{background:#3a2d15;border:1px solid #765b28;color:#ffe3a5;padding:12px;border-radius:13px;font-size:12px;line-height:1.5;margin-bottom:15px}
+.sectionhead{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px}.sectionhead h2{font-size:16px;margin:0}.muted{color:var(--muted);font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat,.card{background:var(--panel);border:1px solid #25354a;border-radius:16px;padding:14px}.stat b{display:block;font-size:22px}.stat span{color:var(--muted);font-size:11px}
+.tabs{display:flex;gap:8px;overflow:auto;padding:4px 0 10px}.tab,button,select{border:1px solid #31445d;background:var(--panel2);color:var(--text);border-radius:11px;padding:10px 13px;font:inherit}.tab{white-space:nowrap}.tab.active{background:#1b604d;border-color:#35a982}
+.card{margin:10px 0}.matchtop{display:flex;justify-content:space-between;gap:10px}.teams{font-weight:700;font-size:16px}.league{color:var(--muted);font-size:11px;margin-bottom:5px}.pill{font-size:10px;padding:4px 8px;border-radius:20px;background:#25374b;color:#b8c9dc;height:max-content}.markets{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:13px}.market{background:#1b293c;border-radius:10px;padding:9px}.market small{display:block;color:var(--muted);font-size:10px}.market b{font-size:13px}.reason{font-size:12px;color:#c3d0df;line-height:1.5;margin-top:12px}
+.sliprow{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #29384b}.sliprow:last-child{border:0}.odd{font-weight:800;color:var(--green);font-size:18px}
+label{display:block;color:var(--muted);font-size:12px;margin:9px 0 5px}input,select{width:100%;padding:11px;background:#101a29;border:1px solid #34475f;border-radius:10px;color:white}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button.primary{background:#1b765a;border-color:#279b73;font-weight:700}button:active{transform:scale(.98)}
+footer{text-align:center;color:#8294aa;font-size:11px;padding:28px 10px}
+.hidden{display:none}.empty{color:var(--muted);font-size:13px;padding:15px 0}
+@media(min-width:600px){.markets{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">⚽</div><div><h1>Football Predictor</h1><p>Match research · probabilities · results tracking</p></div></div></header>
+<main>
+<div class="notice"><b>Prototype / demo mode.</b> Match examples and probabilities below are illustrative, not live fixtures or betting advice. No prediction is guaranteed. Live daily analysis needs a connected football-data source.</div>
+<div class="stats">
+ <div class="stat"><b id="tracked">0</b><span>Tracked picks</span></div>
+ <div class="stat"><b id="wins">0</b><span>Correct</span></div>
+ <div class="stat"><b id="accuracy">—</b><span>Accuracy</span></div>
+</div>
+<div class="sectionhead"><h2>Today’s analysis</h2><span class="muted" id="today"></span></div>
+<div class="tabs" id="marketTabs">
+ <button class="tab active" data-market="all">All markets</button><button class="tab" data-market="BTTS">BTTS</button><button class="tab" data-market="1X2">Full-time 1X2</button><button class="tab" data-market="HT/FT">HT/FT</button><button class="tab" data-market="Draw">Draws</button><button class="tab" data-market="Score">Correct score</button>
+</div>
+<div id="matches"></div>
+<div class="sectionhead"><h2>Daily odds targets</h2><span class="muted">Illustrative only</span></div>
+<div class="card" id="slips">
+ <div class="sliprow"><div><b>2.00 odds</b><div class="muted">Lower target · fewer selections preferred</div></div><span class="odd">2.00</span></div>
+ <div class="sliprow"><div><b>3.00 odds</b><div class="muted">Moderate target</div></div><span class="odd">3.00</span></div>
+ <div class="sliprow"><div><b>5.00 odds</b><div class="muted">Higher risk</div></div><span class="odd">5.00</span></div>
+ <div class="sliprow"><div><b>10.00 odds</b><div class="muted">Speculative · highest risk</div></div><span class="odd">10.00</span></div>
+ <p class="reason">The app will not fabricate selections to reach an odds target. Combined odds multiply risk; even high-probability legs can lose as a combination.</p>
+</div>
+<div class="sectionhead"><h2>Prediction tracker</h2><span class="muted">Record actual outcomes</span></div>
+<div class="card">
+ <div class="formgrid">
+  <div><label>Match / pick</label><input id="pickName" placeholder="e.g. Team A vs Team B — BTTS Yes"></div>
+  <div><label>Estimated probability (%)</label><input id="prob" type="number" min="1" max="99" placeholder="e.g. 72"></div>
+ </div>
+ <div class="actions"><button class="primary" id="addPick">Add prediction</button><button id="export">Export results CSV</button></div>
+ <div id="history" class="empty">No tracked predictions yet.</div>
+</div>
+<div class="sectionhead"><h2>How analysis works</h2></div>
+<div class="card reason">A proper live version should evaluate recent form, home/away performance, goals for and against, head-to-head context, xG when available, injuries/team news and market odds. It should show uncertainty and abstain when data is missing. HT/FT and correct-score markets are inherently difficult to predict reliably.</div>
+<footer>Football Predictor prototype · Free starter build<br>Use for research and record-keeping. Bet responsibly.</footer>
+</main>
+<script>
+const demo = [
+ {league:"DEMO DATA · NOT A REAL FIXTURE",home:"Northbridge FC",away:"Riverside United",time:"Example match",btts:"Yes · 61%",one:"1 · 48%",htft:"X/1 · 22%",draw:"X · 27%",score:"1–1 · 12%",why:"Illustrative reasoning only: a balanced fictional matchup. No real team statistics are connected."},
+ {league:"DEMO DATA · NOT A REAL FIXTURE",home:"Eastvale City",away:"Westport Athletic",time:"Example match",btts:"No · 57%",one:"1 · 55%",htft:"1/1 · 31%",draw:"X · 24%",score:"1–0 · 14%",why:"Illustrative reasoning only: fictional home advantage and low-scoring profile. Not a real forecast."}
+];
+let selected="all";
+const $=id=>document.getElementById(id);
+$("today").textContent=new Date().toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+function renderMatches(){
+ const keys={BTTS:["BTTS","btts"],"1X2":["Full-time 1X2","one"],"HT/FT":["HT/FT","htft"],Draw:["Draw","draw"],Score:["Correct score","score"]};
+ $("matches").innerHTML=demo.map((m,i)=>{
+  const entries=Object.entries(keys).filter(([k])=>selected==="all"||selected===k);
+  return `<div class="card"><div class="matchtop"><div><div class="league">${m.league}</div><div class="teams">${m.home} vs ${m.away}</div><div class="muted">${m.time}</div></div><span class="pill">DEMO</span></div><div class="markets">${entries.map(([k,[label,key]])=>`<div class="market"><small>${label}</small><b>${m[key]}</b></div>`).join("")}</div><div class="reason">${m.why}</div></div>`;
+ }).join("");
+}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");selected=b.dataset.market;renderMatches()}));
+let picks=JSON.parse(localStorage.getItem("fp_picks")||"[]");
+function save(){localStorage.setItem("fp_picks",JSON.stringify(picks));renderHistory()}
+function renderHistory(){
+ const decided=picks.filter(p=>p.result!==null),wins=decided.filter(p=>p.result==="win").length;
+ $("tracked").textContent=picks.length;$("wins").textContent=wins;$("accuracy").textContent=decided.length?Math.round(wins/decided.length*100)+"%":"—";
+ $("history").innerHTML=picks.length?picks.map((p,i)=>`<div class="sliprow"><div><b>${escapeHtml(p.name)}</b><div class="muted">Estimated probability: ${p.prob}% · ${p.result||"Pending"}</div></div><div class="actions"><button data-win="${i}">Correct</button><button data-loss="${i}">Wrong</button></div></div>`).join(""):"No tracked predictions yet.";
+ document.querySelectorAll("[data-win]").forEach(b=>b.onclick=()=>{picks[+b.dataset.win].result="win";save()});
+ document.querySelectorAll("[data-loss]").forEach(b=>b.onclick=()=>{picks[+b.dataset.loss].result="loss";save()});
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+$("addPick").onclick=()=>{let name=$("pickName").value.trim(),prob=Number($("prob").value);if(!name||prob<1||prob>99){alert("Enter a pick and a probability from 1 to 99.");return}picks.push({name,prob,result:null});$("pickName").value="";$("prob").value="";save()};
+$("export").onclick=()=>{let rows=[["Pick","Probability","Result"],...picks.map(p=>[p.name,p.prob,p.result||"pending"])];let csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(",")).join("\\n");let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="football-predictions.csv";a.click();URL.revokeObjectURL(a.href)};
+renderMatches();renderHistory();
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
+</script>
+</body></html>
